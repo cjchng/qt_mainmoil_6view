@@ -1,7 +1,7 @@
 # qt_mainmoil_6view
 Sample Qt Moil Application
 
-![screenshot](https://github.com/cjchng/qt_mainmoil_6view/blob/master/images/screen.gif?raw=true =800x)
+![screenshot](https://github.com/cjchng/qt_mainmoil_6view/blob/master/images/screen.gif =800x)
 
 ## 1. Requirement 
 
