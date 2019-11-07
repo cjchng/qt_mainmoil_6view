@@ -28,7 +28,7 @@ If you already have Opencv and Qt creator installed, the followings can be skipp
 	git clone https://github.com/cjchng/qt_mainmoil_6view.git
 	cd ~/qt_mainmoil_6view/moildev_install
 	sudo chmod +x install.sh
-        sudo ./install.sh 	
+	sudo ./install.sh 	
 	
 	qtcreator 
 
