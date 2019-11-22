@@ -23,7 +23,17 @@ MainWindow::MainWindow(QWidget *parent) :
     double calibrationWidth = md.getImageWidth();
 double iCy = md.getiCy();
 ConfigData *cd = md.getcd();
+
     image_input = imread( "image.jpg", IMREAD_COLOR);
+    if( image_input.empty() )                      // Check for invalid input
+    {
+
+        QMessageBox msgBox;
+        msgBox.setText("Could not find image.jpg");
+        msgBox.exec();
+        close();
+        qApp->quit();
+    }
     double w = image_input.cols;
     double h = image_input.rows;
 

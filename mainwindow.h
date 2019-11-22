@@ -23,6 +23,7 @@
 #include <QDesktopWidget>
 #include <QPixmap>
 #include <QMouseEvent>
+#include <QMessageBox>
 
 #include "ui_mainwindow.h"
 #include "moildev.h"

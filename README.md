@@ -37,6 +37,8 @@ If you already have Opencv and Qt creator installed, the followings can be skipp
 	Select "File/Open File or Project" in Qt menu bar, browse to ~/qt_mainmoil_6view/mainmoil.pro
     Select Project on the left side window, click "Configure Project"
 	Select Build/ Build project "mainmoil" or press Ctrl+B
- 	Press F5 to run 
- 
+ 	The default {Build directory} of this project is ~/build-mainmoil-Desktop-Debug, please copy a image file to the {Build directory}
+        cp ~/qt_mainmoil_6view/images/image.jpg {Build directory}    
+        Press F5 to run in Qt creator
+        
 
