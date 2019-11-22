@@ -144,7 +144,8 @@ void MainWindow::DisplayCh(int ch)
 
     switch (ch) {
     case 0:  // 2 x 3
-        md.Remap(image_input, image_result, mapX[0], mapY[0]);
+        // md.Remap(image_input, image_result, mapX[0], mapY[0]);
+        remap( image_input, image_result, mapX[0], mapY[0], INTER_CUBIC, BORDER_CONSTANT, Scalar(0, 0, 0));
         cv::resize(image_result, image_display[0], Size(ch_width,ch_height));
         cvtColor(image_display[0], image_display[0], CV_BGR2RGB);
         DisplayWindow(image_display[0], ui->label2, x_base+ch_width, y_base, ch_width, ch_height-y_base);
