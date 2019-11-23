@@ -358,7 +358,7 @@ void MainWindow::openCamera()
     timer->start(33);
 }
 
-void MainWindow::readFarme()
+void MainWindow::readFrame()
 {
     if ( cap0->isOpened() ) {
     cap0->read(*frame);
@@ -369,15 +369,6 @@ void MainWindow::readFarme()
     frame = cvQueryFrame(cam);
     QImage image((const uchar*)frame->imageData, frame->width, frame->height, QImage::Format_RGB888);
     ui->label->setPixmap(QPixmap::fromImage(image));
-    */
-}
-
-void MainWindow::takingPictures()
-{
-    /*
-    frame = cvQueryFrame(cam);
-    QImage image((const uchar*)frame->imageData, frame->width, frame->height, QImage::Format_RGB888).rgbSwapped();
-    ui->label1->setPixmap(QPixmap::fromImage(image));
     */
 }
 
