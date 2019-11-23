@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
     double calibrationWidth = md.getImageWidth();
 double iCy = md.getiCy();
 ConfigData *cd = md.getcd();
+    const std::string videoStreamAddress = "http://192.168.100.2/stream.mjpg";
 
     image_input = imread( "image.jpg", IMREAD_COLOR);
     if( image_input.empty() )                      // Check for invalid input
@@ -316,10 +317,10 @@ void MainWindow::camButtonClicked()
 {
     if ( !CaptureState ) {
         CaptureState = true ;
-        openCamara();
+        openCamera();
     }
     else {
-        closeCamara();
+        closeCamera();
         CaptureState = false ;
     }
 }
@@ -352,7 +353,7 @@ void MainWindow::ch6ButtonClicked()
     DisplayCh(6);
 }
 
-void MainWindow::openCamara()
+void MainWindow::openCamera()
 {
     timer->start(33);
 }
@@ -381,7 +382,7 @@ void MainWindow::takingPictures()
 }
 
 
-void MainWindow::closeCamara()
+void MainWindow::closeCamera()
 {
     timer->stop();
     //cvReleaseCapture(&cam);

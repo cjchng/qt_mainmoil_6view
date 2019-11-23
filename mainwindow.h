@@ -53,9 +53,9 @@ private slots:
     void ch4ButtonClicked();
     void ch5ButtonClicked();
     void ch6ButtonClicked();
-    void openCamara();
+    void openCamera();
     void readFarme();
-    void closeCamara();
+    void closeCamera();
     void takingPictures();
 
 private:
