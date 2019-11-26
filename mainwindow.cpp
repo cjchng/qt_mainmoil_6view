@@ -6,12 +6,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
 
-    timer   = new QTimer(this);
-    imag    = new QImage();
-    frame   = new Mat;
-    Moildev md ;
-    screen = QApplication::desktop()->screenGeometry();
 
+
+    screen = QApplication::desktop()->screenGeometry();
+    timer   = new QTimer(this);
     ui->setupUi(this);
     this->move(0,screen.height()-this->geometry().height());
 // repo220_T2
@@ -21,23 +19,37 @@ MainWindow::MainWindow(QWidget *parent) :
         0, 0, 0, 0, -47.96, 222.86
         );
     double calibrationWidth = md.getImageWidth();
-double iCy = md.getiCy();
-ConfigData *cd = md.getcd();
-    const std::string videoStreamAddress = "http://192.168.100.2/stream.mjpg";
+    double iCy = md.getiCy();
+    ConfigData *cd = md.getcd();
 
-    image_input = imread( "image.jpg", IMREAD_COLOR);
-    if( image_input.empty() )                      // Check for invalid input
-    {
+// USB camera
+// cap0 = cv::VideoCapture(0);
 
-        QMessageBox msgBox;
-        msgBox.setText("Could not find image.jpg");
-        msgBox.exec();
-        close();
-        qApp->quit();
-    }
-    double w = image_input.cols;
-    double h = image_input.rows;
+// MJPG-Streamer
+// https://blog.miguelgrinberg.com/post/how-to-build-and-run-mjpg-streamer-on-the-raspberry-pi
+// https://github.com/jacksonliam/mjpg-streamer
+// const std::string videoStreamAddress = "http://192.168.100.2:8080/?action=stream";
 
+// python3
+// const std::string videoStreamAddress = "http://192.168.100.2:8000/stream.mjpg";
+// cap0.open(videoStreamAddress);
+/*
+if (!cap0.isOpened())  // if not success, exit program
+{
+    QMessageBox msgBox;
+    msgBox.setText("Cannot open the video cam");
+    msgBox.exec();
+    close();
+    qApp->quit();
+}
+double dWidth = cap0.get(CV_CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
+double dHeight = cap0.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the video
+*/
+
+    double w = fix_width;
+    double h = fix_height;
+
+    readImage("image.jpg");  // default input image
 
     mapX[0] = Mat(h, w, CV_32F);
     mapX[1] = Mat(w, h, CV_32F);
@@ -105,8 +117,7 @@ else {
 // parorama : 0.36 sec. -> 0.28 without 2nd Mat
 
     double time_clock = (double)(clock() - tStart)/CLOCKS_PER_SEC ;
-    Vec3b p(0,0,0) ;
-    image_input.at<Vec3b>(0, 0) = p;
+
 
 ch_width = (screen.width()-100)/3 ;
 ch_height = ch_width*3/4 ;
@@ -132,6 +143,24 @@ ch_height = ch_width*3/4 ;
         m_button_ch[i]->setGeometry(QRect(QPoint(190+(i+1)*60, screen.height()-120),QSize(50, 50)));
     }
 
+
+        connect(timer, SIGNAL(timeout()), this, SLOT(readFrame()));
+
+        openAction = new QAction(QIcon("./images/image.svg"), tr("&Open Image"), this);
+        QToolBar *toolBar = addToolBar(tr("&File"));
+        toolBar->addAction(openAction);
+        connect(openAction, SIGNAL(triggered()), this, SLOT (openImage()));
+
+        m_pLabel = new QLabel("URL : ", this);
+        m_pLabel->setGeometry(150,25, 100,30);
+        m_pEdit = new QLineEdit("", this);
+        m_pEdit->setGeometry(200,25, 300,30);
+        // m_pButton = new QPushButton("Save", this);
+        // m_pButton->setGeometry(500,25, 30,30);
+        // connect(m_pButton, SIGNAL (released()),this, SLOT (saveURL()));
+        m_sSettingsFile = QApplication::applicationDirPath() + "/settings.ini";
+        loadSettings();
+
         connect(m_button_multi, SIGNAL (released()), this, SLOT (multiButtonClicked()));
         connect(m_button_ch[0], SIGNAL (released()), this, SLOT (ch1ButtonClicked()));
         connect(m_button_ch[1], SIGNAL (released()), this, SLOT (ch2ButtonClicked()));
@@ -147,11 +176,27 @@ ch_height = ch_width*3/4 ;
         connect(ui->label5, SIGNAL (clicked()), this, SLOT (ch5ButtonClicked()));
         connect(ui->label6, SIGNAL (clicked()), this, SLOT (ch6ButtonClicked()));
 
+
+}
+
+void MainWindow::readImage(QString filename)
+{
+    std::string fname = filename.toUtf8().constData();
+    image_input = imread( fname, IMREAD_COLOR);
+    if( !image_input.empty() )                      // Check for invalid input
+        {
+        if (( image_input.cols != fix_width ) || ( image_input.rows != fix_height )) {
+        cv::resize(image_input, image_input, Size(fix_width, fix_height));
+        }
+        Vec3b p(0,0,0) ;
+        image_input.at<Vec3b>(0, 0) = p;
+    }
 }
 
 void MainWindow::DisplayCh(int ch)
 {
     Mat image_result, image_resultv;
+if( image_input.empty()) return ;
 
     switch (ch) {
     case 0:  // 2 x 3
@@ -176,59 +221,59 @@ void MainWindow::DisplayCh(int ch)
         md.Remap(image_input, image_result, mapX[3], mapY[3]);
         cv::resize(image_result, image_display[3], Size(ch_width,ch_height));
         cvtColor(image_display[3], image_display[3], CV_BGR2RGB);
-        DisplayWindow(image_display[3], ui->label4, x_base+ch_width, ch_height+y_base, ch_width,ch_height-y_base);
+        DisplayWindow(image_display[3], ui->label4, x_base+ch_width, ch_height+y_gap, ch_width,ch_height-y_base);
 
         md.Remap(image_input, image_result, mapX[4], mapY[4]);
         md.Rotate(image_result, image_result, 180.0);
         cv::resize(image_result, image_display[4], Size(ch_width,ch_height));
         cvtColor(image_display[4], image_display[4], CV_BGR2RGB);
-        DisplayWindow(image_display[4], ui->label5, x_base, ch_height+y_base, ch_width,ch_height-y_base);
+        DisplayWindow(image_display[4], ui->label5, x_base, ch_height+y_gap, ch_width,ch_height-y_base);
 
         md.Remap(image_input, image_result, mapX[5], mapY[5]);
         md.Rotate(image_result, image_result, 180.0);
         cv::resize(image_result, image_display[5], Size(ch_width,ch_height));
         cvtColor(image_display[5], image_display[5], CV_BGR2RGB);
-        DisplayWindow(image_display[5], ui->label6, x_base+ch_width*2, ch_height+y_base, ch_width,ch_height-y_base);
+        DisplayWindow(image_display[5], ui->label6, x_base+ch_width*2, ch_height+y_gap, ch_width,ch_height-y_base);
         break;
     case 2:
         md.Remap(image_input, image_result, mapX[0], mapY[0]);
-        cv::resize(image_result, image_display[0], Size(ch_width*3-x_base,ch_height*2-y_base));
+        cv::resize(image_result, image_display[0], Size(ch_width*3-60,ch_height*2-45));
         cvtColor(image_display[0], image_display[0], CV_BGR2RGB);
-        DisplayWindow(image_display[0], ui->label1, x_base, y_base, ch_width*3-x_base,ch_height*2-y_base);
+        DisplayWindow(image_display[0], ui->label1, x_base, y_base, ch_width*3*0.9,ch_height*2*0.9);
         break;
     case 1:
         md.Remap(image_input, image_resultv, mapX[1], mapY[1]);
         Rotate(image_resultv, image_result, 90.0);
-        cv::resize(image_result, image_display[1], Size(ch_width*3-x_base,ch_height*2-y_base));
+        cv::resize(image_result, image_display[1], Size(ch_width*3*0.9,ch_height*2*0.9));
         cvtColor(image_display[1], image_display[1], CV_BGR2RGB);
-        DisplayWindow(image_display[1], ui->label1, x_base, y_base, ch_width*3-x_base,ch_height*2-y_base);
+        DisplayWindow(image_display[1], ui->label1, x_base, y_base, ch_width*3*0.9,ch_height*2*0.9);
         break;
     case 3:
         md.Remap(image_input, image_resultv, mapX[2], mapY[2]);
         Rotate(image_resultv, image_result, -90.0);
-        cv::resize(image_result, image_display[2], Size(ch_width*3-x_base,ch_height*2-y_base));
+        cv::resize(image_result, image_display[2], Size(ch_width*3*0.9,ch_height*2*0.9));
         cvtColor(image_display[2], image_display[2], CV_BGR2RGB);
-        DisplayWindow(image_display[2], ui->label1, x_base, y_base, ch_width*3-x_base,ch_height*2-y_base);
+        DisplayWindow(image_display[2], ui->label1, x_base, y_base, ch_width*3*0.9,ch_height*2*0.9);
         break;
     case 4:
         md.Remap(image_input, image_result, mapX[3], mapY[3]);
-        cv::resize(image_result, image_display[3], Size(ch_width*3-x_base,ch_height*2-y_base));
+        cv::resize(image_result, image_display[3], Size(ch_width*3*0.9,ch_height*2*0.9));
         cvtColor(image_display[3], image_display[3], CV_BGR2RGB);
-        DisplayWindow(image_display[3], ui->label1, x_base, y_base, ch_width*3-x_base,ch_height*2-y_base);
+        DisplayWindow(image_display[3], ui->label1, x_base, y_base, ch_width*3*0.9,ch_height*2*0.9);
         break;
     case 5:
         md.Remap(image_input, image_result, mapX[4], mapY[4]);
         md.Rotate(image_result, image_result, 180.0);
-        cv::resize(image_result, image_display[4], Size(ch_width*3-x_base,ch_height*2-y_base));
+        cv::resize(image_result, image_display[4], Size(ch_width*3*0.9,ch_height*2*0.9));
         cvtColor(image_display[4], image_display[4], CV_BGR2RGB);
-        DisplayWindow(image_display[4], ui->label1, x_base, y_base, ch_width*3-x_base,ch_height*2-y_base);
+        DisplayWindow(image_display[4], ui->label1, x_base, y_base, ch_width*3*0.9,ch_height*2*0.9);
         break;
     case 6:
         md.Remap(image_input, image_result, mapX[5], mapY[5]);
         md.Rotate(image_result, image_result, 180.0);
-        cv::resize(image_result, image_display[5], Size(ch_width*3-x_base,ch_height*2-y_base));
+        cv::resize(image_result, image_display[5], Size(ch_width*3*0.9,ch_height*2*0.9));
         cvtColor(image_display[5], image_display[5], CV_BGR2RGB);
-        DisplayWindow(image_display[5], ui->label1, x_base, y_base, ch_width*3-x_base,ch_height*2-y_base);
+        DisplayWindow(image_display[5], ui->label1, x_base, y_base, ch_width*3*0.9,ch_height*2*0.9);
         break;
     }
     if (ch==0) {
@@ -246,6 +291,8 @@ void MainWindow::DisplayCh(int ch)
         ui->label5->setVisible(false);
         ui->label6->setVisible(false);
     }
+    currCh = ch ;
+
 
 }
 
@@ -355,32 +402,136 @@ void MainWindow::ch6ButtonClicked()
 
 void MainWindow::openCamera()
 {
-    timer->start(33);
+    // cap0 = cv::VideoCapture(0);
+    const std::string videoStreamAddress = default_videoStreamURL ;
+    cap0.open(videoStreamAddress);
+    if ( cap0.isOpened() )
+    timer->start(200);
+
 }
 
 void MainWindow::readFrame()
 {
-    if ( cap0->isOpened() ) {
-    cap0->read(*frame);
-    QImage image1= QImage((uchar*) frame->data, frame->cols, frame->rows, frame->step, QImage::Format_RGB888);
-    ui->label1->setPixmap(QPixmap::fromImage(image1));
+    if ( cap0.isOpened() ) {
+    cap0.read(image_input);
+    DisplayCh(currCh);
     }
-    /*
-    frame = cvQueryFrame(cam);
-    QImage image((const uchar*)frame->imageData, frame->width, frame->height, QImage::Format_RGB888);
-    ui->label->setPixmap(QPixmap::fromImage(image));
-    */
 }
+
 
 
 void MainWindow::closeCamera()
 {
     timer->stop();
-    //cvReleaseCapture(&cam);
+    cap0.release();
 }
 
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::openImage()
+{
+    bool prevCamActive = false ;
+    if ( cap0.isOpened() ) {
+    closeCamera();
+    prevCamActive = true ;
+    }
+
+    QString filename = QFileDialog::getOpenFileName(this,
+        tr("Open Image"), ".", tr("Image Files (*.png *.jpg *.bmp)"));
+    if ( !filename.isEmpty() ) {
+        readImage(filename);
+        DisplayCh(currCh);
+    }
+    else {
+        if( prevCamActive ) {
+            openCamera();
+        }
+    }
+}
+
+
+
+void MainWindow::on_actionLoad_Image_triggered()
+{
+    openImage();
+}
+
+void MainWindow::on_actionExit_triggered()
+{
+    saveSettings();
+    QCoreApplication::exit() ;
+}
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+    saveSettings();
+}
+
+void MainWindow::on_actionMOIL_triggered()
+{
+    QMessageBox msgBox;
+    msgBox.setText("MOIL \n\n\n Ming Chi University of Technology");
+    msgBox.exec();
+}
+
+void MainWindow::on_actionLoad_triggered()
+{
+    QString filename = QFileDialog::getOpenFileName(this,
+        tr("Open Parameters"), ".", tr("Json Files (*.json)"));
+    if(!filename.isEmpty()) {
+        std::string fname = filename.toUtf8().constData();
+        ifstream inFile;
+        inFile.open(fname);
+
+        stringstream strStream;
+        strStream << inFile.rdbuf(); // Read the file
+        string string = strStream.str();
+        json Para = json::parse(string);
+        md.Config("car", Para["cameraSensorWidth"], Para["cameraSensorHeight"],
+            Para["iCx"], Para["iCy"], Para["ratio"],
+            Para["imageWidth"], Para["imageHeight"], Para["calibrationRatio"],
+            Para["parameter0"],
+            Para["parameter1"],
+            Para["parameter2"],
+            Para["parameter3"],
+            Para["parameter4"],
+            Para["parameter5"]
+            );
+
+        QMessageBox msgBox;
+        QString AA = QString::fromStdString(string);
+        msgBox.setText(AA);
+        msgBox.exec();
+    }
+}
+
+
+void MainWindow::loadSettings()
+{
+ QSettings settings(m_sSettingsFile, QSettings::NativeFormat);
+ QString sText = settings.value("videoSourceURL", "").toString();
+ if (sText == "")
+     sText = QString::fromStdString( default_videoStreamURL );
+
+ if (m_pEdit)
+     m_pEdit->setText(sText);
+}
+
+void MainWindow::saveSettings()
+{
+ QSettings settings(m_sSettingsFile, QSettings::NativeFormat);
+ QString sText = (m_pEdit) ? m_pEdit->text() : "";
+ settings.setValue("videoSourceURL", sText);
+}
+
+void MainWindow::saveURL()
+{
+ saveSettings();
+}
+void MainWindow::on_actionVideo_Source_triggered()
+{
+
 }

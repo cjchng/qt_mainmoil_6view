@@ -31,7 +31,7 @@ SOURCES += \
 INCLUDEPATH += /usr/include/opencv
 
 LIBS += -lmoildev
-LIBS += -L/usr/lib/x86_64-linux-gnu -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs
+LIBS += -L/usr/lib/x86_64-linux-gnu -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_videoio
 
 HEADERS += \
         mainwindow.h \

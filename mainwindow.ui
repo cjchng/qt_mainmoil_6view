@@ -108,12 +108,20 @@
     </property>
     <addaction name="actionLoad"/>
     <addaction name="actionLoad_Image"/>
+    <addaction name="actionVideo_Source"/>
+    <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
      <string>View</string>
     </property>
     <addaction name="actionMulti_view"/>
+    <addaction name="actionCH1"/>
+    <addaction name="actionCH2"/>
+    <addaction name="actionCH3"/>
+    <addaction name="actionCH4"/>
+    <addaction name="actionCH5"/>
+    <addaction name="actionCH6"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
@@ -152,6 +160,46 @@
   <action name="actionMOIL">
    <property name="text">
     <string>MOIL</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionCH1">
+   <property name="text">
+    <string>CH1</string>
+   </property>
+  </action>
+  <action name="actionCH2">
+   <property name="text">
+    <string>CH2</string>
+   </property>
+  </action>
+  <action name="actionCH3">
+   <property name="text">
+    <string>CH3</string>
+   </property>
+  </action>
+  <action name="actionCH4">
+   <property name="text">
+    <string>CH4</string>
+   </property>
+  </action>
+  <action name="actionCH5">
+   <property name="text">
+    <string>CH5</string>
+   </property>
+  </action>
+  <action name="actionCH6">
+   <property name="text">
+    <string>CH6</string>
+   </property>
+  </action>
+  <action name="actionVideo_Source">
+   <property name="text">
+    <string>Video Source</string>
    </property>
   </action>
  </widget>
