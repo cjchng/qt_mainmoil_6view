@@ -37,14 +37,19 @@ If you already have Opencv and Qt creator installed, the followings can be skipp
 	Select "File/Open File or Project" in Qt menu bar, browse to ~/qt_mainmoil_6view/mainmoil.pro
     Select Project on the left side window, click "Configure Project"
 	Select Build/ Build project "mainmoil" or press Ctrl+B
- 	The default {Build directory} of this project is ~/build-mainmoil-Desktop-Debug, please copy a image file to the {Build directory}
+ 	The default {Build directory} of this project is ~/build-mainmoil-Desktop-Debug, please copy 
+	a image file to the {Build directory}
         cp ~/qt_mainmoil_6view/images/image.jpg {Build directory}    
         Press F5 to run in Qt creator
+
+
         
 ## 3. Video from Raspberry camera
+
 	copy files in rpi_camera directory to a Raspberry Pi board with a camera, run
 	python3 rpi_camera.py
-	The Raspberry Pi will start video streaming, then we can specify the "URL" in the mainmoil application, for example,
-	http://192.168.100.2:8000/stream.mpeg
+	The Raspberry Pi will start video streaming, then we can specify the "URL" in the mainmoil application, 
+	for example,
+	http://{Raspberry Pi's IP}:8000/stream.mpeg  
 	Click on "Camera" button to start receiving the video stream.
 	
