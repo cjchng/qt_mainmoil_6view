@@ -22,6 +22,9 @@ MainWindow::MainWindow(QWidget *parent) :
     double iCy = md.getiCy();
     ConfigData *cd = md.getcd();
 
+    palWhite.setColor(QPalette::Button, QColor(Qt::white));
+    palGray.setColor(QPalette::Button, QColor(Qt::lightGray));
+
 // USB camera
 // cap0 = cv::VideoCapture(0);
 
@@ -49,7 +52,7 @@ double dHeight = cap0.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames 
     double w = fix_width;
     double h = fix_height;
 
-    readImage("image.jpg");  // default input image
+    readImage("images/image.jpg");  // default input image
 
     mapX[0] = Mat(h, w, CV_32F);
     mapX[1] = Mat(w, h, CV_32F);
@@ -125,7 +128,7 @@ ch_height = ch_width*3/4 ;
 // original image
 // cv::resize(image_input, image_input_s, Size(ch_width,ch_height));
 
-    DisplayCh(0);
+
 
     this->setGeometry(QRect(QPoint(0, 0),QSize(screen.width(), screen.height())));
 
@@ -143,6 +146,8 @@ ch_height = ch_width*3/4 ;
         m_button_ch[i]->setGeometry(QRect(QPoint(190+(i+1)*60, screen.height()-120),QSize(50, 50)));
     }
 
+
+        DisplayCh(0);
 
         connect(timer, SIGNAL(timeout()), this, SLOT(readFrame()));
 
@@ -175,6 +180,8 @@ ch_height = ch_width*3/4 ;
         connect(ui->label4, SIGNAL (clicked()), this, SLOT (ch4ButtonClicked()));
         connect(ui->label5, SIGNAL (clicked()), this, SLOT (ch5ButtonClicked()));
         connect(ui->label6, SIGNAL (clicked()), this, SLOT (ch6ButtonClicked()));
+
+
 
 
 }
@@ -291,6 +298,16 @@ if( image_input.empty()) return ;
         ui->label5->setVisible(false);
         ui->label6->setVisible(false);
     }
+
+
+    m_button_multi->setPalette(palWhite);
+    for (int i=0;i<6;i++)
+    m_button_ch[i]->setPalette(palWhite);
+    if( ch==0 )
+        m_button_multi->setPalette(palGray);
+    else
+        m_button_ch[ch-1]->setPalette(palGray);
+
     currCh = ch ;
 
 

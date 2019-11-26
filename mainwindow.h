@@ -28,6 +28,8 @@
 #include <QFileDialog>
 #include <QLineEdit>
 #include <QSettings>
+#include <QPalette>
+
 #include "ui_mainwindow.h"
 #include "moildev.h"
 using namespace std;
@@ -90,6 +92,8 @@ private:
     QPushButton *m_button_cam, *m_button_multi, *m_button_ch[6] ;
     Mat image_display[6];
     cv::VideoCapture cap0;
+
+    QPalette palWhite, palGray;
 
     QTimer    *timer;
     bool CaptureState = false;
