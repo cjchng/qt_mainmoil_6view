@@ -1,11 +1,11 @@
 # qt_mainmoil_6view
 Sample Qt Moil Application
 
-![screenshot](https://github.com/cjchng/qt_mainmoil_6view/blob/master/images/screen.gif?raw=true)
+![screenshot](https://github.com/cjchng/qt_mainmoil_6view/blob/master/document/images/screen.gif?raw=true)
 
 ## 1. Requirement 
 
-If you already have Opencv and Qt creator installed, the followings can be skipped. Opencv can be any version, 3.2.0 is recommented. 
+If you already have Opencv and Qt creator installed, the followings can be skipped. Opencv can be any version, Ubuntu 18.04 and Opencv 3.2.0 are recommented. 
 
 	sudo apt update
 	sudo apt upgrade
@@ -32,7 +32,7 @@ If you already have Opencv and Qt creator installed, the followings can be skipp
 	
 	qtcreator 
 
-![screenshot](https://github.com/cjchng/qt_mainmoil_6view/blob/master/images/screen.png?raw=true)
+![screenshot](https://github.com/cjchng/qt_mainmoil_6view/blob/master/document/images/screen.png?raw=true)
 
 	Select "File/Open File or Project" in Qt menu bar, browse to ~/qt_mainmoil_6view/mainmoil.pro
     Select Project on the left side window, click "Configure Project"
@@ -44,12 +44,30 @@ If you already have Opencv and Qt creator installed, the followings can be skipp
 
 
         
-## 3. Video from Raspberry camera
+## 3. Video source from Raspberry camera
 
 	copy files in rpi_camera directory to a Raspberry Pi board with a camera, run
 	python3 rpi_camera.py
-	The Raspberry Pi will start video streaming, then we can specify the "URL" in the mainmoil application, 
-	for example,
+	The Raspberry Pi will start video streaming, then we can specify the "Camera URL" in the mainmoil application, 
+	Example URL is as the following,
 	http://{Raspberry Pi's IP}:8000/stream.mpeg  
 	Click on "Camera" button to start receiving the video stream.
+
+## 4. Applications switch(CAR/ MEDI)
+	
+	The default design is a split-screen view for CAR usage. To switch to a different style view for 
+        MEDI (medical) usage, please modify MOIL_APP as the following, 
+
+![screenshot](https://github.com/cjchng/qt_mainmoil_6view/blob/master/document/images/medi03.png?raw=true)
+
+
+
+
+
+
+
+   
+
+
+
 	

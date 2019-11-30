@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
 
-    MOIL_APP = MoilApp::MEDI;   // Options : MoilApp::CAR, MoilApp::MEDI
+    MOIL_APP = MoilApp::CAR;   // Options : MoilApp::CAR, MoilApp::MEDI
 
     screen = QApplication::desktop()->screenGeometry();
     timer   = new QTimer(this);
