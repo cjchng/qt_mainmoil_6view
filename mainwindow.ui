@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>MainMoil</string>
   </property>
+  <property name="dockNestingEnabled">
+   <bool>false</bool>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QLabel" name="label1">
     <property name="geometry">
@@ -22,6 +25,9 @@
       <width>241</width>
       <height>141</height>
      </rect>
+    </property>
+    <property name="mouseTracking">
+     <bool>false</bool>
     </property>
     <property name="text">
      <string/>
@@ -92,6 +98,22 @@
      <string/>
     </property>
    </widget>
+   <widget class="QListWidget" name="listWidget">
+    <property name="geometry">
+     <rect>
+      <x>630</x>
+      <y>100</y>
+      <width>256</width>
+      <height>192</height>
+     </rect>
+    </property>
+    <property name="verticalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOn</enum>
+    </property>
+    <property name="horizontalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -108,20 +130,7 @@
     </property>
     <addaction name="actionLoad"/>
     <addaction name="actionLoad_Image"/>
-    <addaction name="actionVideo_Source"/>
     <addaction name="actionExit"/>
-   </widget>
-   <widget class="QMenu" name="menuView">
-    <property name="title">
-     <string>View</string>
-    </property>
-    <addaction name="actionMulti_view"/>
-    <addaction name="actionCH1"/>
-    <addaction name="actionCH2"/>
-    <addaction name="actionCH3"/>
-    <addaction name="actionCH4"/>
-    <addaction name="actionCH5"/>
-    <addaction name="actionCH6"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
@@ -130,7 +139,6 @@
     <addaction name="actionMOIL"/>
    </widget>
    <addaction name="menuMainMoil"/>
-   <addaction name="menuView"/>
    <addaction name="menuAbout"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -151,6 +159,9 @@
    <property name="text">
     <string>Load Image</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
   </action>
   <action name="actionMulti_view">
    <property name="text">
@@ -165,6 +176,9 @@
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
    </property>
   </action>
   <action name="actionCH1">

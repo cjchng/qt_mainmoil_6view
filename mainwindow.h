@@ -9,7 +9,12 @@
 #include <time.h>
 #include <iostream>
 #include <fstream>
+#include <sys/types.h>
+#include <dirent.h>
 #include <json.hpp>
+#include <ctime>
+#include <sys/stat.h>
+
 
 #include <QMainWindow>
 #include <QApplication>
@@ -29,9 +34,16 @@
 #include <QLineEdit>
 #include <QSettings>
 #include <QPalette>
+#include <QPoint>
+#include <QListWidget>
+#include <QHBoxLayout>
+#include <QPixmap>
+
 
 #include "ui_mainwindow.h"
 #include "moildev.h"
+#include "mlabel.h"
+
 using namespace std;
 using namespace cv;
 using json = nlohmann::json;
@@ -61,6 +73,7 @@ private slots:
     void ch6ButtonClicked();
     void readFrame();
     void openImage();
+    void openParameter();
     void on_actionLoad_Image_triggered();
     void on_actionExit_triggered();
     void on_actionMOIL_triggered();
@@ -68,28 +81,50 @@ private slots:
     void saveURL();
 
     void on_actionVideo_Source_triggered();
+    void onMousePressed(QMouseEvent *event);
+    void onMouseReleased(QMouseEvent *event);
+    void onMouseMoved(QMouseEvent *event);
+    void onWheel(QWheelEvent *event);
+    void snapshot();
+    void onListItemClicked(QListWidgetItem* item);
+    void upClicked();
+    void downClicked();
+    void leftClicked();
+    void rightClicked();
+    void resetClicked();
+
 
 private:
     void readImage(QString filename);
+    void reSnapshotList();
     void openCamera();
     void closeCamera();
 
     QString m_sSettingsFile;
     QLabel* m_pLabel;
     QLineEdit* m_pEdit;
+    QLabel* m_pMsg;
+    QListWidget *listWidget;
+    QHBoxLayout *layout;
+
+
     QPushButton* m_pButton;
     void loadSettings();
     void saveSettings();
     void closeEvent(QCloseEvent *event);
 
-    QAction *openAction;
+
+    QAction *openParaAction, *openImageAction, *snapAction,
+    *upAction, *downAction, *leftAction, *rightAction;
 
     Moildev md ;
     Ui::MainWindow *ui;
     Mat image_input, image_input_s;
     Mat mapX[6], mapY[6];
+    Mat mapX_Medi, mapY_Medi;
     QRect screen ;
-    QPushButton *m_button_cam, *m_button_multi, *m_button_ch[6] ;
+    QPushButton *m_button_cam, *m_button_multi, *m_button_ch[6];
+    QPushButton *m_up, *m_down, *m_left, *m_right, *m_reset;
     Mat image_display[6];
     cv::VideoCapture cap0;
 
@@ -97,22 +132,50 @@ private:
 
     QTimer    *timer;
     bool CaptureState = false;
+    void showMoilInfo();
     void DisplayCh(int ch);
+    void DisplayOne();
     void DisplayWindow(Mat& src, QLabel *p_label, int x, int y, int w, int h);
     void Rotate(Mat& src, Mat& dst, double angle);
     void MatWrite(const string& filename, const Mat& mat);
     Mat MatRead(const string& filename);
+
     int fix_width = 2592;
     int fix_height = 1944;
-
+    double m_ratio = 1.0;
     int x_base = 40;
     int y_base = 30;
     int y_gap = 5;
     int ch_width = 400;
     int ch_height = 300;
+    int main_width = 400;
+    int main_height = 300;
+
     int DisplayMode = 0;
-    int currCh = 0 ;
+    int currCh = 0;
+    int mouseState = 0 ;
+
+    int currAlpha = 0;
+    int currBeta = 0;
+    double currZoom = 4;
+    const double defaultZoom = 4;
+    const double minZoom = 1;
+    const double maxZoom = 12;
+
+    int minAlpha = -90;
+    int maxAlpha = 90;
+    int minBeta = 0;
+    int maxBeta = 360;
+
+    int currInc = 3;
+
+    QPoint prevMousePos, currMousePos ;
+
     std::string default_videoStreamURL = "http://192.168.100.2:8000/stream.mjpg";
+    Label *pLabel;
+
+    enum class MoilApp { CAR, MEDI };
+    MoilApp MOIL_APP;
 };
 
 #endif // MAINWINDOW_H

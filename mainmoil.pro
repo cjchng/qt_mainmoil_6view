@@ -25,7 +25,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+        mlabel.cpp
 
 # INCLUDEPATH += ../moildev/
 INCLUDEPATH += /usr/include/opencv
@@ -35,8 +36,9 @@ LIBS += -L/usr/lib/x86_64-linux-gnu -lopencv_core -lopencv_highgui -lopencv_imgp
 
 HEADERS += \
         mainwindow.h \
-    configdata.h \
-    moildev.h
+        configdata.h \
+        moildev.h \
+        mlabel.h
 
 FORMS += \
         mainwindow.ui
