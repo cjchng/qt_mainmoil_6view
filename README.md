@@ -48,8 +48,8 @@ If you already have Opencv and Qt creator installed, the followings can be skipp
 
 	copy files in rpi_camera directory to a Raspberry Pi board with a camera, run
 	python3 rpi_camera.py
-	The Raspberry Pi will start video streaming, then we can specify the "Camera URL" in the mainmoil application, 
-	Example URL is as the following,
+	The Raspberry Pi will start video streaming, then we can specify the "Camera URL" in the mainmoil 
+	application, example URL is as the following,
 	http://{Raspberry Pi's IP}:8000/stream.mpeg  
 	Click on "Camera" button to start receiving the video stream.
 
