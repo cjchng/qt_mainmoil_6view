@@ -35,7 +35,7 @@ If you already have Opencv and Qt creator installed, the followings can be skipp
 ![screenshot](https://github.com/cjchng/qt_mainmoil_6view/blob/master/document/images/screen.png?raw=true)
 
 	Select "File/Open File or Project" in Qt menu bar, browse to ~/qt_mainmoil_6view/mainmoil.pro
-    Select Project on the left side window, click "Configure Project"
+    	Select Project on the left side window, click "Configure Project"
 	Select Build/ Build project "mainmoil" or press Ctrl+B
  	The default {Build directory} of this project is ~/build-mainmoil-Desktop-Debug, please copy 
 	a image file to the {Build directory}
@@ -52,6 +52,7 @@ If you already have Opencv and Qt creator installed, the followings can be skipp
 	Example URL is as the following,
 	http://{Raspberry Pi's IP}:8000/stream.mpeg  
 	Click on "Camera" button to start receiving the video stream.
+
 
 ## 4. Applications switch(CAR/ MEDI)
 	
