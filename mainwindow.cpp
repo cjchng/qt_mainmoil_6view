@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
 
-    MOIL_APP = MoilApp::CAR;   // Options : MoilApp::CAR, MoilApp::MEDI
+    MOIL_APP = MoilApp::CAR;   // Options : MoilApp::CAR, MoilApp::MEDICAL
 
     screen = QApplication::desktop()->screenGeometry();
     timer   = new QTimer(this);
@@ -107,7 +107,7 @@ else {
     md.AnyPointM((float *)mapX[5].data, (float *)mapY[5].data, mapX[5].cols, mapX[5].rows, 70, 135, 4, m_ratio);   // right-lower view, rotate 180
 }
 }
-else // ( MOIL_APP == MoilApp::MEDI )
+else // ( MOIL_APP == MoilApp::MEDICAL )
 {
     md.AnyPointM((float *)mapX_Medi.data, (float *)mapY_Medi.data, mapX_Medi.cols, mapX_Medi.rows, (double)currAlpha, (double)currBeta, 4, m_ratio);
 }
@@ -159,7 +159,7 @@ switch ( MOIL_APP ) {
 
 
         break;
-    case MoilApp::MEDI :
+    case MoilApp::MEDICAL :
 
     m_button_cam = new QPushButton("Camera", this);
     m_button_cam->setGeometry(QRect(QPoint( 40, screen.height()-190),QSize(100, 100)));
@@ -276,7 +276,7 @@ switch ( MOIL_APP ) {
             case MoilApp::CAR :
             DisplayCh(0);
             break;
-            case MoilApp::MEDI :
+            case MoilApp::MEDICAL :
             DisplayOne();
         }
 }
@@ -285,7 +285,7 @@ switch ( MOIL_APP ) {
 void MainWindow::showMoilInfo()
 {
     QString str;
-    if ( MOIL_APP == MoilApp::MEDI )
+    if ( MOIL_APP == MoilApp::MEDICAL )
     {
         str.sprintf("A: %d     B: %d    Z: %.2f", currAlpha, currBeta, currZoom);
         if (m_pMsg!=NULL)
@@ -346,7 +346,7 @@ if (!thisMat->empty()) {
 }
 
         break;
-        case MoilApp::MEDI :
+        case MoilApp::MEDICAL :
 
     if (!image_display[0].empty()) {
         Mat image_display_tmp;
@@ -622,7 +622,8 @@ if (((currAlpha - y_inc) >= -90) && ((currAlpha - y_inc) <= 90))
       currAlpha = -90;
 
     currBeta = (currBeta + x_inc) % 360;
-
+    if ( currBeta < 0 )
+         currBeta += 360 ;
     md.AnyPointM((float *)mapX_Medi.data, (float *)mapY_Medi.data, mapX_Medi.cols, mapX_Medi.rows, (double)currAlpha, (double)currBeta, currZoom, m_ratio);
     DisplayOne();
 
@@ -705,7 +706,7 @@ void MainWindow::readFrame()
         case MoilApp::CAR :
             DisplayCh(currCh);
         break;
-    case MoilApp::MEDI :
+    case MoilApp::MEDICAL :
             DisplayOne();
         break;
     }

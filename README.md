@@ -57,7 +57,7 @@ If you already have Opencv and Qt creator installed, the followings can be skipp
 ## 4. Applications switch(CAR/ MEDI)
 	
 	The default design of Mainmoil_6view is a split-screen view for CAR usage. To switch it to a different
-	style view for MEDI (medical) usage, please modify MOIL_APP in mainwindow.cpp as the following, 
+	style view for MEDICAL usage, please modify MOIL_APP in mainwindow.cpp as the following, 
 
 ![screenshot](https://github.com/cjchng/qt_mainmoil_6view/blob/master/document/images/medi03.png?raw=true)
 

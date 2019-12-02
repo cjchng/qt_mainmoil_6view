@@ -174,7 +174,7 @@ private:
     std::string default_videoStreamURL = "http://192.168.100.2:8000/stream.mjpg";
     Label *pLabel;
 
-    enum class MoilApp { CAR, MEDI };
+    enum class MoilApp { CAR, MEDICAL };
     MoilApp MOIL_APP;
 };
 
