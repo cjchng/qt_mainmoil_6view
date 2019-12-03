@@ -63,7 +63,7 @@ If you already have Opencv and Qt creator installed, the followings can be skipp
 
         The result would be 
 
-![screenshot](https://github.com/cjchng/qt_mainmoil_6view/blob/master/document/images/screen2.gif?raw=true)
+![screenshot](https://github.com/cjchng/qt_mainmoil_6view/blob/master/document/images/screen2.png?raw=true)
 
 
 ## 5. More
