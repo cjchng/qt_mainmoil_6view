@@ -41,8 +41,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     double w = fix_width;
     double h = fix_height;
-
-    readImage("images/image.jpg");  // default input image
+// default input image
+if ( MOIL_APP == MoilApp::CAR )
+    readImage("images/image.jpg");
+else if ( MOIL_APP == MoilApp::MEDICAL)
+    readImage("images/image2.jpg");
 
     mapX_Medi = Mat(h, w, CV_32F);
     mapY_Medi = Mat(h, w, CV_32F);
