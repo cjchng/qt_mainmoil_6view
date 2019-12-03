@@ -67,7 +67,7 @@ If you already have Opencv and Qt creator installed, the followings can be skipp
 
 	Please find a more detail presentation slides about this project at:
 
-	[MAINMOIL - MOIL development](https://docs.google.com/presentation/d/1c1W65ponMch01k7egMYc0rotQ330t962lqH4vVwZHJs/edit?usp=sharing(
+	[MAINMOIL - MOIL development](https://docs.google.com/presentation/d/1c1W65ponMch01k7egMYc0rotQ330t962lqH4vVwZHJs/edit?usp=sharing)
 
 
 
