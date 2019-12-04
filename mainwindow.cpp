@@ -683,7 +683,7 @@ void MainWindow::ch6ButtonClicked()
 void MainWindow::openCamera()
 {
     // cap0 = cv::VideoCapture(0);
-    const std::string videoStreamAddress = default_videoStreamURL ;
+    const std::string videoStreamAddress = m_pEdit->text().toUtf8().constData() ;
     cap0.open(videoStreamAddress);
     if ( cap0.isOpened() )
     timer->start(200);
