@@ -54,7 +54,7 @@ If you already have Opencv and Qt creator installed, the followings can be skipp
 	Click on "Camera" button to start receiving the video stream.
 
 
-## 4. Applications switch(CAR/ MEDI)
+## 4. Applications switch(CAR/ MEDICAL)
 	
 	The default design of Mainmoil_6view is a split-screen view for CAR usage. To switch it to a different
 	style view for MEDICAL usage, please modify MOIL_APP in mainwindow.cpp as the following, 
