@@ -6,9 +6,20 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    MOIL_APP = MoilApp::CAR;                // Options : CAR, MEDICAL
+    medicalState = MedicalState::ANYPOINT;  // Options : ORIGINAL, ANYPOINT, PANORAMA
 
-    MOIL_APP = MoilApp::CAR;   // Options : MoilApp::CAR, MoilApp::MEDICAL
+    DIR* dir = opendir("snapshot");
+    if (!dir)
+    {
+#ifdef _WIN32
+    _mkdir("snapshot");
+#else
+    mkdir("snapshot",0755);
+#endif
+    }
 
+    dbConnect("snapshot/moil.db");
     screen = QApplication::desktop()->screenGeometry();
     timer   = new QTimer(this);
     ui->setupUi(this);
@@ -49,6 +60,9 @@ else if ( MOIL_APP == MoilApp::MEDICAL)
 
     mapX_Medi = Mat(h, w, CV_32F);
     mapY_Medi = Mat(h, w, CV_32F);
+
+    mapX_MediPano = Mat(h, w, CV_32F);
+    mapY_MediPano = Mat(h, w, CV_32F);
 
     mapX[0] = Mat(h, w, CV_32F);
     mapX[1] = Mat(w, h, CV_32F);
@@ -113,6 +127,7 @@ else {
 else // ( MOIL_APP == MoilApp::MEDICAL )
 {
     md.AnyPointM((float *)mapX_Medi.data, (float *)mapY_Medi.data, mapX_Medi.cols, mapX_Medi.rows, (double)currAlpha, (double)currBeta, 4, m_ratio);
+    md.Panorama(mapX_MediPano, mapY_MediPano, m_ratio);
 }
 
 // intel i7-8700
@@ -121,7 +136,7 @@ else // ( MOIL_APP == MoilApp::MEDICAL )
 // md.Remap()   : 0.235 sec.
 // md.Remap()+Rotate() : 0.323 sec.
 // MatRad (X+Y) : 0.0157 sec. ( 1/1000 of AnyPoint)
-// parorama : 0.36 sec. -> 0.28 without 2nd Mat
+// panorama : 0.36 sec. -> 0.28 without 2nd Mat
 
     double time_clock = (double)(clock() - tStart)/CLOCKS_PER_SEC ;
     main_width = this->geometry().width()-400 ;
@@ -169,44 +184,64 @@ switch ( MOIL_APP ) {
     m_button_cam->setStyleSheet("border:3px solid darkgray;");
     connect(m_button_cam, SIGNAL (released()), this, SLOT (camButtonClicked()));
 
-    QPoint arrowsPos(240, screen.height()-156);
-    QSize arrowSize(48,48);
+    QPoint arrowsPos(520, screen.height()-156);
+    QSize arrowSize(46,46);
     QPixmap *pixmap;
+
+    // m_original = new QPushButton("", this);
+    m_original = new Label("", this);
+    m_original->setGeometry(QRect(arrowsPos + QPoint(-280,-45),QSize(220,140)));
+    m_original->setStyleSheet("border:3px solid darkgray;");
+    connect(m_original, SIGNAL (clicked(QMouseEvent*)), this, SLOT (originalClicked(QMouseEvent*)));
+
+    m_anypoint = new QPushButton("", this);
+    m_anypoint->setGeometry(QRect(arrowsPos + QPoint(-46,-45),QSize(220,140)));
+    m_anypoint->setStyleSheet("border:3px solid darkgray;");
+    m_anypoint->setShortcut(QKeySequence(Qt::Key_A));
+    connect(m_anypoint, SIGNAL (released()), this, SLOT (anypointClicked()));
+
+    m_paronama = new QPushButton("", this);
+    m_paronama->setGeometry(QRect(arrowsPos + QPoint(200,-45),QSize(220,140)));
+    pixmap = new QPixmap("images/pano.png");
+    m_paronama->setIcon(QIcon(*pixmap));
+    m_paronama->setIconSize(QSize(210,130));
+    m_paronama->setStyleSheet("border:3px solid darkgray;");
+    m_paronama->setShortcut(QKeySequence(Qt::Key_P));
+    connect(m_paronama, SIGNAL (released()), this, SLOT (panoramaClicked()));
 
     m_left = new QPushButton("", this);
     m_left->setGeometry(QRect(arrowsPos,arrowSize));
-    pixmap = new QPixmap("images/circle-left.svg");
+    pixmap = new QPixmap("images/undo.svg");
     m_left->setIcon(QIcon(*pixmap));
     m_left->setIconSize(pixmap->rect().size());
-    //m_left->setStyleSheet("border: none;");
+    m_left->setStyleSheet("border:2px solid darkgray;");
     m_left->setShortcut(QKeySequence(Qt::Key_Left));
     connect(m_left, SIGNAL (released()), this, SLOT (leftClicked()));
 
-
     m_right = new QPushButton("", this);
-    m_right->setGeometry(QRect(arrowsPos + QPoint(96,0),arrowSize));
-    pixmap = new QPixmap("images/circle-right.svg");
+    m_right->setGeometry(QRect(arrowsPos + QPoint(92,0),arrowSize));
+    pixmap = new QPixmap("images/redo.svg");
     m_right->setIcon(QIcon(*pixmap));
     m_right->setIconSize(pixmap->rect().size());
-    //m_right->setStyleSheet("border: none;");
+    m_right->setStyleSheet("border:2px solid darkgray;");
     m_right->setShortcut(QKeySequence(Qt::Key_Right));
     connect(m_right, SIGNAL (released()), this, SLOT (rightClicked()));
 
     m_up = new QPushButton("", this);
-    m_up->setGeometry(QRect(arrowsPos + QPoint(48,-48),arrowSize));
-    pixmap = new QPixmap("images/circle-up.svg");
+    m_up->setGeometry(QRect(arrowsPos + QPoint(46,-44),arrowSize));
+    pixmap = new QPixmap("images/arrow-up2.svg");
     m_up->setIcon(QIcon(*pixmap));
     m_up->setIconSize(pixmap->rect().size());
-    //m_up->setStyleSheet("border: none;");
+    m_up->setStyleSheet("border:2px solid darkgray;");
     m_up->setShortcut(QKeySequence(Qt::Key_Up));
     connect(m_up, SIGNAL (released()), this, SLOT (upClicked()));
 
     m_down = new QPushButton("", this);
-    m_down->setGeometry(QRect(arrowsPos + QPoint(48,48),arrowSize));
-    pixmap = new QPixmap("images/circle-down.svg");
+    m_down->setGeometry(QRect(arrowsPos + QPoint(46,46),arrowSize));
+    pixmap = new QPixmap("images/arrow-down2.svg");
     m_down->setIcon(QIcon(*pixmap));
     m_down->setIconSize(pixmap->rect().size());
-    //m_down->setStyleSheet("border: none;");
+    m_down->setStyleSheet("border:2px solid darkgray;");
     m_down->setShortcut(QKeySequence(Qt::Key_Down));
     connect(m_down, SIGNAL (released()), this, SLOT (downClicked()));
 
@@ -233,7 +268,7 @@ switch ( MOIL_APP ) {
     connect(ui->listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
             this, SLOT(onListItemClicked(QListWidgetItem*)));
 
- ui->listWidget->setGeometry(QRect(QPoint(this->geometry().width()-350, 12),QSize( 240, this->geometry().height()-180)));
+ ui->listWidget->setGeometry(QRect(QPoint(this->geometry().width()-350, 25),QSize( 240, this->geometry().height()-180)));
  ui->listWidget->setToolTip("Image List");
  ui->listWidget->setIconSize(QSize(240,180));
  ui->listWidget->setViewMode(QListView::IconMode);
@@ -256,10 +291,14 @@ switch ( MOIL_APP ) {
         connect(openImageAction, SIGNAL(triggered()), this, SLOT (openImage()));
 
         QToolBar *toolBar2 = addToolBar(tr("&Bar2"));
-        snapAction = new QAction(QIcon("./images/camera.svg"), tr("&Take Snapshot"), this);
+        snapAction = new QAction(QIcon("./images/camera.svg"), tr("&Take Snapshot"), this);    
+        QWidget *spacerWidget = new QWidget(this);
+        spacerWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        spacerWidget->setVisible(true);
+        toolBar2->addWidget(spacerWidget);
         toolBar2->addAction(snapAction);
-        connect(snapAction, SIGNAL(triggered()), this, SLOT (snapshot()));
 
+        connect(snapAction, SIGNAL(triggered()), this, SLOT (snapshot()));
 
         m_pLabel = new QLabel("Camera URL :", this);
         m_pLabel->setGeometry(300,25, 100,30);
@@ -280,7 +319,7 @@ switch ( MOIL_APP ) {
             DisplayCh(0);
             break;
             case MoilApp::MEDICAL :
-            DisplayOne();
+            DisplayOne(true);
         }
 }
 
@@ -290,7 +329,10 @@ void MainWindow::showMoilInfo()
     QString str;
     if ( MOIL_APP == MoilApp::MEDICAL )
     {
-        str.sprintf("A: %d     B: %d    Z: %.2f", currAlpha, currBeta, currZoom);
+        if ( medicalState == MedicalState::ANYPOINT )
+            str.sprintf("A: %d     B: %d    Z: %.2f", currAlpha, currBeta, currZoom);
+        else
+            str = "";
         if (m_pMsg!=NULL)
         m_pMsg->setText(str);
     }
@@ -314,8 +356,9 @@ void MainWindow::snapshot()
 {
     time_t now = time(0);
     tm *ltm = localtime(&now);
-    char filename[32];
-    sprintf(filename,"snapshot/%04d%02d%02d_%02d%02d%02d.jpg",ltm->tm_year+1900,ltm->tm_mon+1,ltm->tm_mday,ltm->tm_hour,ltm->tm_min,ltm->tm_sec );
+    char f_name[32], filename[64];
+    sprintf(f_name,"%04d%02d%02d_%02d%02d%02d.jpg",ltm->tm_year+1900,ltm->tm_mon+1,ltm->tm_mday,ltm->tm_hour,ltm->tm_min,ltm->tm_sec );
+    sprintf(filename,"snapshot/%s", f_name);
     DIR* dir = opendir("snapshot");
     if (!dir)
     {
@@ -352,9 +395,27 @@ if (!thisMat->empty()) {
         case MoilApp::MEDICAL :
 
     if (!image_display[0].empty()) {
+
+        // fisheye image
         Mat image_display_tmp;
+        cv::imwrite(filename, image_input);
+
+        // thumbnail
+        sprintf(filename,"snapshot/thumbnail/%s", f_name);
+        DIR* dir2 = opendir("snapshot/thumbnail");
+        if (!dir2)
+        {
+    #ifdef _WIN32
+        _mkdir("snapshot/thumbnail");
+    #else
+        mkdir("snapshot/thumbnail",0755);
+    #endif
+        }
         cvtColor(image_display[0], image_display_tmp, CV_RGB2BGR);
         cv::imwrite(filename, image_display_tmp);
+        QString str(f_name);
+        dbAddRecord(str, currAlpha, currBeta, currZoom);
+
         reSnapshotList();
     }
 }
@@ -375,9 +436,12 @@ void MainWindow::reSnapshotList()
     while ((dp = readdir(dir)) != NULL)
     {
         QString str(dp->d_name);
+        if (str.contains(".jpg"))
+        {
         ui->listWidget->addItem(new QListWidgetItem(
-                           QIcon("snapshot/" + str), str));
-       qDebug( "%s", dp->d_name );
+                           QIcon("snapshot/thumbnail/" + str), str));
+        qDebug( "%s", dp->d_name );
+        }
     }
     ui->listWidget->sortItems();
     closedir(dir);
@@ -385,7 +449,7 @@ void MainWindow::reSnapshotList()
 }
 void MainWindow::DisplayCh(int ch)
 {
-    Mat image_result, image_resultv;
+Mat image_result, image_resultv;
 if( image_input.empty()) return ;
 
     switch (ch) {
@@ -498,16 +562,38 @@ if( image_input.empty()) return ;
 
 }
 
-void MainWindow::DisplayOne()
+void MainWindow::DisplayOne(bool refreshOriginal)
 {
-    Mat image_result, image_resultv;
+Mat image_result;
 if( image_input.empty()) return ;
+Mat image_original ;
+
+if (refreshOriginal) {
+cv::resize(image_input,  image_original, Size(m_original->geometry().width(), m_original->geometry().height()));
+cvtColor(image_original, image_original, CV_BGR2RGB);
+DisplayWindow(image_original, m_original, m_original->geometry().x(), m_original->geometry().y(), m_original->geometry().width(), m_original->geometry().height());
+}
+
+switch ( medicalState ) {
+case MedicalState::ORIGINAL :
+    cv::resize(image_input,  image_display[0], Size(main_width,main_height));
+    break;
+case MedicalState::ANYPOINT :
     md.Remap(image_input, image_result, mapX_Medi, mapY_Medi);
     cv::resize(image_result,  image_display[0], Size(main_width,main_height));
+    break;
+case MedicalState::PANORAMA :
+    md.Remap(image_input, image_result, mapX_MediPano, mapY_MediPano);
+    cv::resize(image_result,  image_display[0], Size(main_width,main_height));
+    break;
+
+}
     cvtColor(image_display[0], image_display[0], CV_BGR2RGB);
     DisplayWindow(image_display[0], ui->label1, x_base, y_base, main_width,main_height );
     showMoilInfo();
 }
+
+
 
 void MainWindow::DisplayWindow(Mat& src, QLabel *p_label, int x, int y, int w, int h)
 {
@@ -599,12 +685,11 @@ void MainWindow::onMousePressed(QMouseEvent *event)
 void MainWindow::onMouseReleased(QMouseEvent *event)
 {
     mouseState = 0;
-    // qDebug("x: %d, y: %d", event->x(), event->y());
-    QString str ;
 }
 
 void MainWindow::onMouseMoved(QMouseEvent *event)
 {
+if(medicalState != MedicalState::ANYPOINT) return ;
 if (mouseState == 0)
 {
     prevMousePos = event->pos();
@@ -628,7 +713,7 @@ if (((currAlpha - y_inc) >= -90) && ((currAlpha - y_inc) <= 90))
     if ( currBeta < 0 )
          currBeta += 360 ;
     md.AnyPointM((float *)mapX_Medi.data, (float *)mapY_Medi.data, mapX_Medi.cols, mapX_Medi.rows, (double)currAlpha, (double)currBeta, currZoom, m_ratio);
-    DisplayOne();
+    DisplayOne(false);
 
 
     prevMousePos = event->pos();
@@ -636,6 +721,8 @@ if (((currAlpha - y_inc) >= -90) && ((currAlpha - y_inc) <= 90))
 
 void MainWindow::onWheel(QWheelEvent *event)
 {
+if(medicalState != MedicalState::ANYPOINT) return ;
+
     QString str ;
     double w = (double)event->delta()/200.0;
     if ( w > 0 ) {
@@ -651,7 +738,7 @@ void MainWindow::onWheel(QWheelEvent *event)
             currZoom = minZoom;
     }
     md.AnyPointM((float *)mapX_Medi.data, (float *)mapY_Medi.data, mapX_Medi.cols, mapX_Medi.rows, (double)currAlpha, (double)currBeta, currZoom, m_ratio);
-    DisplayOne();
+    DisplayOne(false);
 
 }
 
@@ -685,10 +772,13 @@ void MainWindow::openCamera()
     // cap0 = cv::VideoCapture(0);
     const std::string videoStreamAddress = m_pEdit->text().toUtf8().constData() ;
     cap0.open(videoStreamAddress);
-    if ( cap0.isOpened() )
+    if ( cap0.isOpened() ) {
     timer->start(200);
     CaptureState = true ;
     m_button_cam->setStyleSheet("border:5px solid darkgray;background-color: lightgray;");
+    if ( MOIL_APP == MoilApp::MEDICAL )
+        medicalState = MedicalState::ANYPOINT ;
+    }
 }
 
 
@@ -710,7 +800,7 @@ void MainWindow::readFrame()
             DisplayCh(currCh);
         break;
     case MoilApp::MEDICAL :
-            DisplayOne();
+            DisplayOne(true);
         break;
     }
     }
@@ -734,7 +824,15 @@ void MainWindow::openImage()
         tr("Open Image"), ".", tr("Image Files (*.png *.jpg *.bmp)"));
     if ( !filename.isEmpty() ) {
         readImage(filename);
-        DisplayCh(currCh);
+        switch ( MOIL_APP ) {
+            case MoilApp::CAR :
+            DisplayCh(currCh);
+            break;
+            case MoilApp::MEDICAL :
+            medicalState = MedicalState::ANYPOINT ;
+            refreshMedicalState();
+            resetClicked();
+        }
     }
     else {
         if( prevCamActive ) {
@@ -843,63 +941,217 @@ void MainWindow::on_actionVideo_Source_triggered()
 
 void MainWindow::onListItemClicked(QListWidgetItem* item)
 {
-    QString str1(item->text());
-    QString str = "border-image:url(snapshot/" + str1 + ")0 0 0 0 stretch stretch;";
+
+    // show snapshot 
+    QString filename(item->text());
+
+    /*
+    QString str = "border-image:url(snapshot/" + filename + ")0 0 0 0 stretch stretch;";
     QDialog *subDialog = new QDialog;
     subDialog->setWindowTitle("Snapshot");
     subDialog->resize(screen.width()*0.8, screen.height()*0.8);
     subDialog->setStyleSheet( str );
     subDialog->show();
+    */
+    int a, b;
+    float z;
+    bool Ret = dbGetRecord(filename, &a, &b, &z) ;
+    if ( Ret ) {
+    if ( cap0.isOpened() ) {
+    closeCamera();
+    }
+
+    readImage("snapshot/" + filename);
+
+    switch ( MOIL_APP ) {
+        case MoilApp::CAR :
+        DisplayCh(currCh);
+        break;
+        case MoilApp::MEDICAL :
+        medicalState = MedicalState::ANYPOINT ;
+        refreshMedicalState();
+        currAlpha = a;
+        currBeta = b;
+        currZoom = z;
+        md.AnyPointM((float *)mapX_Medi.data, (float *)mapY_Medi.data, mapX_Medi.cols, mapX_Medi.rows, (double)currAlpha, (double)currBeta, currZoom, m_ratio);
+        DisplayOne(true);
+    }
+
+
+
+    }
 }
 
 void MainWindow::upClicked()
 {
+    if(medicalState != MedicalState::ANYPOINT) {
+            medicalState = MedicalState::ANYPOINT ;
+            refreshMedicalState();
+    }
+    else {
     if ( currAlpha + currInc <= 90 )
         currAlpha = currAlpha + currInc ;
     else
         currAlpha = 90 ;
+    }
     md.AnyPointM((float *)mapX_Medi.data, (float *)mapY_Medi.data, mapX_Medi.cols, mapX_Medi.rows, (double)currAlpha, (double)currBeta, currZoom, m_ratio);
-    DisplayOne();
+    DisplayOne(false);
 }
 
 void MainWindow::downClicked()
 {
+    if(medicalState != MedicalState::ANYPOINT) {
+            medicalState = MedicalState::ANYPOINT ;
+            refreshMedicalState();
+    }
+    else {
     if ( currAlpha - currInc >= -90 )
         currAlpha = currAlpha - currInc ;
     else
         currAlpha = -90 ;
+    }
     md.AnyPointM((float *)mapX_Medi.data, (float *)mapY_Medi.data, mapX_Medi.cols, mapX_Medi.rows, (double)currAlpha, (double)currBeta, currZoom, m_ratio);
-    DisplayOne();
+    DisplayOne(false);
 }
 
 void MainWindow::leftClicked()
 {
+    if(medicalState != MedicalState::ANYPOINT) {
+            medicalState = MedicalState::ANYPOINT ;
+            refreshMedicalState();
+    }
+    else {
     if( currBeta - currInc >= 0 )
         currBeta = currBeta - currInc ;
     else
         currBeta = ( currBeta - currInc ) + 360 ;
-
+    }
     md.AnyPointM((float *)mapX_Medi.data, (float *)mapY_Medi.data, mapX_Medi.cols, mapX_Medi.rows, (double)currAlpha, (double)currBeta, currZoom, m_ratio);
-    DisplayOne();
+    DisplayOne(false);
 }
 
 void MainWindow::rightClicked()
 {
+    if(medicalState != MedicalState::ANYPOINT) {
+            medicalState = MedicalState::ANYPOINT ;
+            refreshMedicalState();
+    }
+    else {
     currBeta = ( currBeta + currInc ) % 360 ;
+    if (currBeta < 0) currBeta += 360;
+    }
     md.AnyPointM((float *)mapX_Medi.data, (float *)mapY_Medi.data, mapX_Medi.cols, mapX_Medi.rows, (double)currAlpha, (double)currBeta, currZoom, m_ratio);
-    DisplayOne();
+    DisplayOne(false);
 }
 
+void MainWindow::refreshMedicalState()
+{
+    switch( medicalState ) {
+    case MedicalState::ORIGINAL :
+        m_original->setStyleSheet("border:5px solid red;");
+        m_anypoint->setStyleSheet("border:3px solid darkgray;");
+        m_paronama->setStyleSheet("border:3px solid darkgray;");
+        break;
+    case MedicalState::ANYPOINT :
+        m_original->setStyleSheet("border:5px solid darkgray;");
+        m_anypoint->setStyleSheet("border:3px solid red;");
+        m_paronama->setStyleSheet("border:3px solid darkgray;");
+        break;
+    case MedicalState::PANORAMA :
+        m_original->setStyleSheet("border:5px solid darkgray;");
+        m_anypoint->setStyleSheet("border:3px solid darkgray;");
+        m_paronama->setStyleSheet("border:3px solid red;");
+        break;
+
+    }
+}
 void MainWindow::resetClicked()
 {
+    if(medicalState != MedicalState::ANYPOINT) {
+            medicalState = MedicalState::ANYPOINT ;
+            refreshMedicalState();
+    }
+    else {
     currAlpha = 0;
     currBeta = 0;
     currZoom = defaultZoom ;
-
+    }
     md.AnyPointM((float *)mapX_Medi.data, (float *)mapY_Medi.data, mapX_Medi.cols, mapX_Medi.rows, (double)currAlpha, (double)currBeta, currZoom, m_ratio);
-    DisplayOne();
+    DisplayOne(false);
 }
 
 
+void MainWindow::originalClicked(QMouseEvent*)
+{
+    medicalState = MedicalState::ORIGINAL ;
+    refreshMedicalState();
+    DisplayOne(false);
+}
+
+void MainWindow::anypointClicked()
+{
+    medicalState = MedicalState::ANYPOINT ;
+    refreshMedicalState();
+    DisplayOne(false);
+}
+
+void MainWindow::panoramaClicked()
+{
+    medicalState = MedicalState::PANORAMA ;
+    refreshMedicalState();
+    DisplayOne(false);
+}
 
 
+bool MainWindow::dbConnect(const QString &dbName)
+{
+db = QSqlDatabase::addDatabase("QSQLITE");
+db.setDatabaseName(dbName);
+if (!db.open()) {
+qDebug() << "Database Error!";
+return false;
+}
+QSqlQuery query;
+if (!query.exec("CREATE TABLE if not exists imageinfo ("
+"id INTEGER PRIMARY KEY AUTOINCREMENT,"
+"filename VARCHAR,"
+"alpha INT,"
+"beta INT,"
+"zoom FLOAT)")) {
+return false;
+}
+
+return true;
+}
+
+bool MainWindow::dbAddRecord(QString filename, int alpha, int beta, float zoom)
+{
+    QSqlQuery query;
+    QString str ;
+    str.sprintf("INSERT INTO imageinfo (filename, alpha, beta, zoom) VALUES (\"%s\", %d, %d, %f)", filename.toUtf8().constData(), currAlpha, currBeta, currZoom);
+    if(!query.exec(str)){
+    return false ;
+    }
+    return true;
+}
+
+bool MainWindow::dbGetRecord(QString filename, int *alpha, int *beta, float *zoom)
+{
+    QSqlQuery query;
+    QString str ;
+    str.sprintf("SELECT * FROM imageinfo  WHERE filename =\"%s\"", filename.toUtf8().constData());
+    if(!query.exec(str)){
+    qDebug() << "Failed!";
+    return false;
+    }
+    else {
+        while(query.next())
+        {
+           qDebug() << query.value(0).toInt() << query.value(1).toString() << query.value(2).toInt() << query.value(3).toInt() << query.value(4).toFloat();
+           *alpha = query.value(2).toInt();
+           *beta = query.value(3).toInt();
+           *zoom = query.value(4).toFloat();
+        }
+    }
+return true;
+}

@@ -38,7 +38,8 @@
 #include <QListWidget>
 #include <QHBoxLayout>
 #include <QPixmap>
-
+#include <QSqlDatabase>
+#include <QSqlQuery>
 
 #include "ui_mainwindow.h"
 #include "moildev.h"
@@ -92,13 +93,16 @@ private slots:
     void leftClicked();
     void rightClicked();
     void resetClicked();
-
+    void originalClicked(QMouseEvent*);
+    void panoramaClicked();
+    void anypointClicked();
 
 private:
     void readImage(QString filename);
     void reSnapshotList();
     void openCamera();
     void closeCamera();
+    void refreshMedicalState();
 
     QString m_sSettingsFile;
     QLabel* m_pLabel;
@@ -122,9 +126,12 @@ private:
     Mat image_input, image_input_s;
     Mat mapX[6], mapY[6];
     Mat mapX_Medi, mapY_Medi;
+    Mat mapX_MediPano, mapY_MediPano;
     QRect screen ;
     QPushButton *m_button_cam, *m_button_multi, *m_button_ch[6];
     QPushButton *m_up, *m_down, *m_left, *m_right, *m_reset;
+    QPushButton *m_paronama, *m_anypoint;
+    Label *m_original;
     Mat image_display[6];
     cv::VideoCapture cap0;
 
@@ -134,12 +141,14 @@ private:
     bool CaptureState = false;
     void showMoilInfo();
     void DisplayCh(int ch);
-    void DisplayOne();
+    void DisplayOne(bool refreshOriginal);
     void DisplayWindow(Mat& src, QLabel *p_label, int x, int y, int w, int h);
     void Rotate(Mat& src, Mat& dst, double angle);
     void MatWrite(const string& filename, const Mat& mat);
     Mat MatRead(const string& filename);
-
+    bool dbConnect(const QString &dbName);
+    bool dbAddRecord(QString filename, int alpha, int beta, float zoom);
+    bool dbGetRecord(QString filename, int *alpha, int *beta, float *zoom);
     int fix_width = 2592;
     int fix_height = 1944;
     double m_ratio = 1.0;
@@ -175,7 +184,11 @@ private:
     Label *pLabel;
 
     enum class MoilApp { CAR, MEDICAL };
+    enum class MedicalState { ORIGINAL, ANYPOINT, PANORAMA };
+
     MoilApp MOIL_APP;
+    MedicalState medicalState ;
+    QSqlDatabase db;
 };
 
 #endif // MAINWINDOW_H
