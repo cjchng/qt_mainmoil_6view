@@ -276,7 +276,7 @@ switch ( MOIL_APP ) {
  ui->listWidget->setViewMode(QListView::IconMode);
  pLabel->stackUnder(ui->listWidget);
  reSnapshotList();
-
+ refreshMedicalState();
 
         break;
 }
