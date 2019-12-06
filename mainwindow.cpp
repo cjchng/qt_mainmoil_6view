@@ -144,6 +144,8 @@ else // ( MOIL_APP == MoilApp::MEDICAL )
 
 ch_width = (screen.width()-100)/3 ;
 ch_height = ch_width*3/4 ;
+int ch_limit = (screen.height() - 120 - y_gap - 40)/2 ;
+ch_height = (ch_height > ch_limit)?ch_limit:ch_height;
 
 // original image
 // cv::resize(image_input, image_input_s, Size(ch_width,ch_height));
