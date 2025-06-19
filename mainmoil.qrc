@@ -1,0 +1,33 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/wrench.svg</file>
+        <file>images/video-camera.svg</file>
+        <file>images/undo.svg</file>
+        <file>images/switch.svg</file>
+        <file>images/stop2.svg</file>
+        <file>images/spinner11.svg</file>
+        <file>images/redo.svg</file>
+        <file>images/radio-checked2.svg</file>
+        <file>images/play3.svg</file>
+        <file>images/play.svg</file>
+        <file>images/pause2.svg</file>
+        <file>images/pano.png</file>
+        <file>images/image.svg</file>
+        <file>images/film.svg</file>
+        <file>images/file-text2.svg</file>
+        <file>images/circle-up.svg</file>
+        <file>images/circle-right.svg</file>
+        <file>images/circle-left.svg</file>
+        <file>images/circle-down.svg</file>
+        <file>images/chess.jpg</file>
+        <file>images/camera.svg</file>
+        <file>images/arrow-up2.svg</file>
+        <file>images/arrow-down2.svg</file>
+        <file>qss/mainmoil.qss</file>
+        <file>images/previous2.svg</file>
+        <file>images/next2.svg</file>
+        <file>images/first.svg</file>
+        <file>images/pano2.png</file>
+        <file>images/anypoint.png</file>
+    </qresource>
+</RCC>
